@@ -3,11 +3,13 @@ import os
 from pynput import keyboard
 import simpleaudio as sa  # For playing audio
 
+DATA_PATH = "/home/mariam/tts/EAED/EAED/EAED/AshamIblis"
+# DATA_PATH = "C:/Users/mahmoud/projects/TTS/EAED/AshamIblis"
+
 # Path to the transcriptions.csv file
 transcriptions_csv = "transcriptions.csv"
 
-# Counter for processed audio files
-audio_counter = 0
+
 
 # Function to wait for key press actions
 def wait_for_key():
@@ -33,12 +35,36 @@ def play_audio(wave_obj):
     play_obj = wave_obj.play()
     play_obj.wait_done()  # Wait for the audio to finish
 
+
+
+# Start index for audio files 
+start = 0
+
+# Play audios in reverse order if True
+reversed = False
+# reversed = True
+
 # Read the CSV file
 with open(transcriptions_csv, mode='r', encoding='utf-8') as file:
     reader = csv.DictReader(file)
+
+    rows = list(reader)
+
+    # Counter for processed audio files
+    audio_counter = start
+
+
+
     
+
     # Iterate through the rows in the CSV
-    for row in reader:
+    if reversed:
+        rows = rows[start::-1]
+    else:
+        rows = rows[start:]
+
+    
+    for row in rows:
         # Extract file path and other details
         speaker = row["Speaker"]
         emotion = row["Emotion"]
@@ -46,7 +72,7 @@ with open(transcriptions_csv, mode='r', encoding='utf-8') as file:
         transcription = row["Transcription"]
         
         # Construct the full file path
-        file_path = os.path.join("/home/mariam/tts/EAED/EAED/EAED/AshamIblis", speaker, emotion, file_name)
+        file_path = os.path.join(DATA_PATH , speaker, emotion, file_name)
         
         if not os.path.isfile(file_path):
             print(f"Audio file not found: {file_path}")
@@ -54,7 +80,10 @@ with open(transcriptions_csv, mode='r', encoding='utf-8') as file:
         
         try:
             # Increment audio counter
-            audio_counter += 1
+            if reversed:
+                audio_counter -= 1
+            else:
+                audio_counter += 1
             
             # Print details before playing audio
             print(f"\nPlaying audio {audio_counter}: {file_name}")
